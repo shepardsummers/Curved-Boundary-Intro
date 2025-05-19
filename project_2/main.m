@@ -1,7 +1,7 @@
 clear all
 %% Defination of Parameters
 % Domain Related
-D = 17; 
+D = 21; 
 
 N_x = 35*D;
 N_y = 9*D;
@@ -95,7 +95,7 @@ end
 f_new=f;
 f_eq=f;
 
-Timer=20000;
+Timer=50000;
 %% Solving
 x_circ = center_x;
 y_circ = center_y;
@@ -503,10 +503,10 @@ contourf(flipud(vel_mag),30)
 axis equal tight
 
 figure
-siz = 2;
+siz = 6;
 u = flip(squeeze(U(1, :, :)));
 v = squeeze(U(2, :, :));
-[startX, startY] = meshgrid(1:siz:N_x, 1:siz:N_y);
+[startX, startY] = meshgrid(1:siz:N_x, 1:4:N_y);
 verts = stream2(1:N_x,1:N_y,u,v,startX,startY);
 streamline(verts)
 axis equal tight
