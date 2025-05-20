@@ -1,7 +1,7 @@
 clear all
 %% Defination of Parameters
 % Domain Related
-D = 21; 
+D = 29; 
 
 N_x = 35*D;
 N_y = 9*D;
@@ -332,9 +332,9 @@ for j=1:N_y
     
                     % Unknown
                     f_new(2,j,i) = f_new(4,j,i)+Rho_in*U_in*2/3;
-                    f_new(5,j,i) = f_new(5,N_y,i);
+                    f_new(5,j,i) = f_new(5,N_y-1,i);
                     %f_new(6,j,i) = f_new(6,N_y,i);
-                    f_new(8,j,i) = f_new(8,N_y,i);
+                    f_new(8,j,i) = f_new(8,N_y-1,i);
                     %f_new(9,j,i) = f_new(9,N_y,i);
                     f_new(6,j,i) = f_new(8,j,i)+(f_new(5,j,i)-f_new(3,j,i))/2+Rho_in*U_in/6; % Double Check
                     f_new(9,j,i) = f_new(7,j,i)-(f_new(5,j,i)-f_new(3,j,i))/2+Rho_in*U_in/6; % Double Check
@@ -346,10 +346,10 @@ for j=1:N_y
     
                     % Unknown
                     %f_new(4,j,i) = f_new(2,j,i);
-                    f_new(5,j,i) = f_new(5,N_y,i);
+                    f_new(5,j,i) = f_new(5,N_y-1,i);
                     %f_new(7,j,i) = f_new(7,j,i-1);
                     %f_new(8,j,i) = f_new(6,j,i);
-                    f_new(9,j,i) = f_new(9,N_y,i);
+                    f_new(9,j,i) = f_new(9,N_y-1,i);
                     f_new(4,j,i) = f_new(4,j,i-1);
                     f_new(7,j,i) = f_new(7,j,i-1);
                     f_new(8,j,i) = f_new(8,j,i-1);
@@ -362,9 +362,9 @@ for j=1:N_y
                     f_new(7,j,i) = f(7,j+1,i+1);
     
                     % Unknown
-                    f_new(5,j,i) = f_new(5,N_y,i);
-                    f_new(8,j,i) = f_new(8,N_y,i);
-                    f_new(9,j,i) = f_new(9,N_y,i);
+                    f_new(5,j,i) = f_new(5,N_y-1,i);
+                    f_new(8,j,i) = f_new(8,N_y-1,i);
+                    f_new(9,j,i) = f_new(9,N_y-1,i);
                 end
             elseif j == N_y % This is the bottom boundary nodes
                 if i ==1 % Bottom-Left corner node
@@ -375,9 +375,9 @@ for j=1:N_y
                     
                     % Unknown
                     f_new(2,j,i) = f_new(4,j,i)+Rho_in*U_in*2/3;
-                    f_new(3,j,i) = f_new(3,1,i);
+                    f_new(3,j,i) = f_new(3,1+1,i);
                     %f_new(6,j,i) = f_new(6,1,i);
-                    f_new(7,j,i) = f_new(7,1,i);
+                    f_new(7,j,i) = f_new(7,1+1,i);
                     %(9,j,i) = f_new(9,1,i);
                     f_new(6,j,i) = f_new(8,j,i)+(f_new(5,j,i)-f_new(3,j,i))/2+Rho_in*U_in/6; % Double Check
                     f_new(9,j,i) = f_new(7,j,i)-(f_new(5,j,i)-f_new(3,j,i))/2+Rho_in*U_in/6; % Double Check
@@ -391,9 +391,9 @@ for j=1:N_y
                     f_new(4,j,i) = f_new(4,j,i-1);
                     f_new(7,j,i) = f_new(7,j,i-1);
                     f_new(8,j,i) = f_new(8,j,i-1);
-                    f_new(3,j,i) = f_new(3,1,i);
+                    f_new(3,j,i) = f_new(3,1+1,i);
                     %f_new(4,j,i) = f_new(2,j,i);
-                    f_new(6,j,i) = f_new(6,1,i);
+                    f_new(6,j,i) = f_new(6,1+1,i);
                     %f_new(7,j,i) = f_new(9,j,i);
                     %f_new(8,j,i) = f_new(6,j,i);
                 else % All other nodes on the bottom boundary
@@ -405,9 +405,9 @@ for j=1:N_y
                     f_new(9,j,i) = f(9,j-1,i-1);
     
                     % Unknown
-                    f_new(3,j,i) = f_new(3,1,i);
-                    f_new(6,j,i) = f_new(6,1,i);
-                    f_new(7,j,i) = f_new(7,1,i);
+                    f_new(3,j,i) = f_new(3,1+1,i);
+                    f_new(6,j,i) = f_new(6,1+1,i);
+                    f_new(7,j,i) = f_new(7,1+1,i);
                 end
             elseif i == 1 % This is the left boundary nodes
                 f_new(1,j,i) = f(1,j,i);
@@ -465,7 +465,7 @@ U = pagemtimes(Ksi,f_new)./Rho;
 f_eq = pagemtimes(w',Rho).*(1 + 3*pagemtimes(Ksi',U) + 9/2*(pagemtimes(Ksi', U).^2) - 3/2*sum(U.*U,1));
 % BGK Collision & Update
 f=f_new-(f_new-f_eq)/Tau;
-err = sum(Rho,"all")-old_rho;
+err = abs(sum(Rho,"all")-old_rho);
 
 fprintf("Itt: %i   |   Err: %e\n", t, err)
 end
