@@ -1,7 +1,7 @@
 clear all
 %% Defination of Parameters
 % Domain Related
-D = 29; 
+D = 37; 
 
 N_x = 35*D;
 N_y = 9*D;
@@ -75,12 +75,12 @@ Ksi=[0 1 0 -1  0 1  -1  -1  1;...
 w=[4/9 1/9 1/9 1/9 1/9 1/36 1/36 1/36 1/36]; % Weights for D2Q9
 c_s=1/sqrt(3); % Speed of Sound for D2Q9
 Tau=1.2; % Relaxation Time
-Rho_in=2;
+%Rho_in=2;
 
 Re = 20;
 viscos = (Tau-0.5)*c_s^2;
 U_in = Re*viscos/(D);
-
+M = U_in*c_s;
 %% Initialization
 Rho_ref=2;
 Rho=ones(1,N_y,N_x)*Rho_ref;
@@ -94,8 +94,8 @@ for j=1:N_y
 end
 f_new=f;
 f_eq=f;
-
-Timer=50000;
+%%
+Timer=2000;
 %% Solving
 x_circ = center_x;
 y_circ = center_y;
@@ -331,11 +331,12 @@ for j=1:N_y
                     f_new(7,j,i) = f(7,j+1,i+1);
     
                     % Unknown
-                    f_new(2,j,i) = f_new(4,j,i)+Rho_in*U_in*2/3;
                     f_new(5,j,i) = f_new(5,N_y-1,i);
                     %f_new(6,j,i) = f_new(6,N_y,i);
                     f_new(8,j,i) = f_new(8,N_y-1,i);
                     %f_new(9,j,i) = f_new(9,N_y,i);
+                    Rho_in = (f_new(1,j,i) + f_new(3,j,i) + f_new(5,j,i) + 2*(f_new(7,j,i) + f_new(4,j,i) + f_new(8,j,i)))/(1-U_in);
+                    f_new(2,j,i) = f_new(4,j,i)+Rho_in*U_in*2/3;
                     f_new(6,j,i) = f_new(8,j,i)+(f_new(5,j,i)-f_new(3,j,i))/2+Rho_in*U_in/6; % Double Check
                     f_new(9,j,i) = f_new(7,j,i)-(f_new(5,j,i)-f_new(3,j,i))/2+Rho_in*U_in/6; % Double Check
                 elseif i == N_x % Top-right corner node
@@ -374,11 +375,12 @@ for j=1:N_y
                     f_new(8,j,i) = f(8,j-1,i+1);
                     
                     % Unknown
-                    f_new(2,j,i) = f_new(4,j,i)+Rho_in*U_in*2/3;
                     f_new(3,j,i) = f_new(3,1+1,i);
                     %f_new(6,j,i) = f_new(6,1,i);
                     f_new(7,j,i) = f_new(7,1+1,i);
                     %(9,j,i) = f_new(9,1,i);
+                    Rho_in = (f_new(1,j,i) + f_new(3,j,i) + f_new(5,j,i) + 2*(f_new(7,j,i) + f_new(4,j,i) + f_new(8,j,i)))/(1-U_in);
+                    f_new(2,j,i) = f_new(4,j,i)+Rho_in*U_in*2/3;
                     f_new(6,j,i) = f_new(8,j,i)+(f_new(5,j,i)-f_new(3,j,i))/2+Rho_in*U_in/6; % Double Check
                     f_new(9,j,i) = f_new(7,j,i)-(f_new(5,j,i)-f_new(3,j,i))/2+Rho_in*U_in/6; % Double Check
                 elseif i == N_x % Bottom-right corner node
@@ -419,6 +421,7 @@ for j=1:N_y
     
                 % Unknown
                 %U_in = 1-(f_new(1,j,i)+f_new(3,j,i)+f_new(5,j,i)+2*(f_new(4,j,i)+f_new(7,j,i)+f_new(8,j,i)))/Rho_in;
+                Rho_in = (f_new(1,j,i) + f_new(3,j,i) + f_new(5,j,i) + 2*(f_new(7,j,i) + f_new(4,j,i) + f_new(8,j,i)))/(1-U_in);
                 f_new(2,j,i) = f_new(4,j,i)+Rho_in*U_in*2/3;
                 f_new(6,j,i) = f_new(8,j,i)+(f_new(5,j,i)-f_new(3,j,i))/2+Rho_in*U_in/6; % Double Check
                 f_new(9,j,i) = f_new(7,j,i)-(f_new(5,j,i)-f_new(3,j,i))/2+Rho_in*U_in/6; % Double Check
@@ -485,7 +488,7 @@ hold on
 plot((0:1:N_y-1)/(N_y-1),u_sim/max(u_sim),"blue")
 
 figure
-quiver(flipud(squeeze(U(1,:,:))),flipud(squeeze(U(2,:,:))),10)
+quiver(flipud(squeeze(U(1,:,:))),flipud(squeeze(U(2,:,:))),20)
 axis equal tight
 
 figure
@@ -502,11 +505,11 @@ figure
 contourf(flipud(vel_mag),30)
 axis equal tight
 
-figure
-siz = 6;
-u = flip(squeeze(U(1, :, :)));
-v = squeeze(U(2, :, :));
-[startX, startY] = meshgrid(1:siz:N_x, 1:4:N_y);
-verts = stream2(1:N_x,1:N_y,u,v,startX,startY);
-streamline(verts)
-axis equal tight
+% figure
+% siz = 6;
+% u = flip(squeeze(U(1, :, :)));
+% v = squeeze(U(2, :, :));
+% [startX, startY] = meshgrid(1:siz:N_x, 1:4:N_y);
+% verts = stream2(1:N_x,1:N_y,u,v,startX,startY);
+% streamline(verts)
+% axis equal tight
