@@ -1,5 +1,7 @@
-function f_new = FH_scheme(x1,y1,x2,y2,R,x_circ,y_circ,U,w,Rho,Ksi,c_s,f,Tau)
+function f_new = FH_scheme(dirc,x1,y1,x2,y2,R,x_circ,y_circ,U,w,Rho,Ksi,c_s)
 
+    opp = [1,4,5,2,3,8,9,6,7];
+    
     c_w = find_the_wall_point(x1,y1,x2,y2, R, x_circ, y_circ);
     delta = sqrt((c_w(1) - x2)^2 + (c_w(2) - y2)^2)/sqrt((x1-x2)^2 + (y1-y2)^2);
     if delta >= 0.5
@@ -13,6 +15,6 @@ function f_new = FH_scheme(x1,y1,x2,y2,R,x_circ,y_circ,U,w,Rho,Ksi,c_s,f,Tau)
     
     f_star = w*Rho*(1 + U_bf'*Ksi/c_s^2 + (U_f*Ksi)^2/(2*c_s^4) - dot(U_f,U_f)/(2*c_s^2));
     
-    f_new = (1 - Chi)*f + Chi*f_star; % Weird "bounceback"
+    f_new( = (1 - Chi)*f(2,j,i) + Chi*f_star; % Weird "bounceback"
 end
 

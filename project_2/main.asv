@@ -1,7 +1,10 @@
-clear all
+clear, clc;
 %% Defination of Parameters
 % Domain Related
 D = 21; 
+
+% FH:1, MLS:2, GZS:3
+scheme = 1;
 
 N_x = 35*D;
 N_y = 9*D;
@@ -95,10 +98,13 @@ end
 f_new=f;
 f_eq=f;
 %%
-Timer=10000;
+Timer=5000;
 %% Solving
 x_circ = center_x;
 y_circ = center_y;
+
+opp = [1,4,5,2,3,8,9,6,7];
+tic
 for t=1:Timer
 % Streaming/Boundary Conditions
 for j=1:N_y
@@ -108,219 +114,99 @@ for j=1:N_y
         elseif Zone_ID(j,i) == 1 % b node
             % Do nothin
         elseif Zone_ID(j,i) == 2 % f node
-            % FH curved boundary scheme goes here
-            %% Direction 1
-            f_new(1,j,i) = f(1,j,i);
+            
+            f_new(1,j,i) = f(1,j,i); 
 
-            %% Direction 2
-            if Zone_ID(j,i+1) == 1 % b-node
-                % xy coords of node inside of circle
-                x1=x(i+1);
-                y1=y(j);
-                % xy coords of node outside of circle
-                x2=x(i);
-                y2=y(j);
-                
-                c_w = find_the_wall_point(x1,y1,x2,y2, R, x_circ, y_circ);
-                delta = sqrt((c_w(1) - x2)^2 + (c_w(2) - y2)^2)/sqrt((x1-x2)^2 + (y1-y2)^2);
-                if delta >= 0.5
-                    Chi = (2*delta - 1)/Tau;
-                    U_bf = (delta - 1)*squeeze(U(:,j,i))/delta;
-                elseif delta < 0.5
-                    Chi = (2*delta - 1)/(Tau - 1);
-                    U_bf = squeeze(U(:,j,i));
-                end
-                U_f = squeeze(U(:,j,i))';
-                
-                f_star = w(2)*Rho(1,j,i)*(1 + U_bf'*Ksi(:,2)/c_s^2 + (U_f*Ksi(:,2))^2/(2*c_s^4) - dot(U_f,U_f)/(2*c_s^2));
-                
-                f_new(4,j,i) = (1 - Chi)*f(2,j,i) + Chi*f_star; % Weird "bounceback"
-            else
-                f_new(4,j,i) = f(4,j,i+1);
+            switch scheme
+                case 1
+                    % FH curved boundary scheme goes here
+                    if Zone_ID(j,i+1) == 1 % Direction 2
+                        f_new(4,j,i) = FH_scheme(x(i+1),y(j),x(i),y(j),R,x_circ,y_circ,squeeze(U(:,j,i)),w(2),Rho(1,j,i),Ksi(:,2),c_s,f(2,j,i),Tau);
+                    else
+                        f_new(4,j,i) = f(4,j,i+1);
+                    end
+                    if Zone_ID(j-1,i) == 1 % Direction 3
+                        f_new(5,j,i) = FH_scheme(x(i),y(j-1),x(i),y(j),R,x_circ,y_circ,squeeze(U(:,j,i)),w(3),Rho(1,j,i),Ksi(:,3),c_s,f(3,j,i),Tau);
+                    else
+                        f_new(5,j,i) = f(5,j-1,i);
+                    end
+                    if Zone_ID(j,i-1) == 1 % Direction 4
+                        f_new(2,j,i) = FH_scheme(x(i-1),y(j),x(i),y(j),R,x_circ,y_circ,squeeze(U(:,j,i)),w(4),Rho(1,j,i),Ksi(:,4),c_s,f(4,j,i),Tau);
+                    else
+                        f_new(2,j,i) = f(2,j,i-1);
+                    end
+                    if Zone_ID(j+1,i) == 1 % Direction 5
+                        f_new(3,j,i) = FH_scheme(x(i),y(j+1),x(i),y(j),R,x_circ,y_circ,squeeze(U(:,j,i)),w(5),Rho(1,j,i),Ksi(:,5),c_s,f(5,j,i),Tau);
+                    else
+                        f_new(3,j,i) = f(3,j+1,i);
+                    end
+                    if Zone_ID(j-1,i+1) == 1 % Direction 6
+                        f_new(8,j,i) = FH_scheme(x(i+1),y(j-1),x(i),y(j),R,x_circ,y_circ,squeeze(U(:,j,i)),w(6),Rho(1,j,i),Ksi(:,6),c_s,f(6,j,i),Tau);
+                    else
+                        f_new(8,j,i) = f(8,j-1,i+1);
+                    end
+                    if Zone_ID(j-1,i-1) == 1 % Direction 7
+                        f_new(9,j,i) = FH_scheme(x(i-1),y(j-1),x(i),y(j),R,x_circ,y_circ,squeeze(U(:,j,i)),w(7),Rho(1,j,i),Ksi(:,7),c_s,f(7,j,i),Tau);
+                    else
+                        f_new(9,j,i) = f(9,j-1,i-1);
+                    end         
+                    if Zone_ID(j+1,i-1) == 1 % Direction 8
+                        f_new(6,j,i) = FH_scheme(x(i-1),y(j+1),x(i),y(j),R,x_circ,y_circ,squeeze(U(:,j,i)),w(8),Rho(1,j,i),Ksi(:,8),c_s,f(8,j,i),Tau);
+                    else
+                        f_new(6,j,i) = f(6,j+1,i-1);
+                    end
+                    if Zone_ID(j+1,i+1) == 1 % Direction 9
+                        f_new(7,j,i) = FH_scheme(x(i+1),y(j+1),x(i),y(j),R,x_circ,y_circ,squeeze(U(:,j,i)),w(9),Rho(1,j,i),Ksi(:,9),c_s,f(9,j,i),Tau);
+                    else
+                        f_new(7,j,i) = f(7,j+1,i+1);
+                    end
+                case 2
+                    % MLS curved boundary scheme goes here
+                    if Zone_ID(j,i+1) == 1 % Direction 2
+                        f_new(4,j,i) = MLS_scheme(x(i+1),y(j),x(i),y(j),R,x_circ,y_circ,squeeze(U(:,j,i)),w(2),Rho(1,j,i),Ksi(:,2),c_s,f(2,j,i),Tau);
+                    else
+                        f_new(4,j,i) = f(4,j,i+1);
+                    end
+                    if Zone_ID(j-1,i) == 1 % Direction 3
+                        f_new(5,j,i) = MLS_scheme(x(i),y(j-1),x(i),y(j),R,x_circ,y_circ,squeeze(U(:,j,i)),w(3),Rho(1,j,i),Ksi(:,3),c_s,f(3,j,i),Tau);
+                    else
+                        f_new(5,j,i) = f(5,j-1,i);
+                    end
+                    if Zone_ID(j,i-1) == 1 % Direction 4
+                        f_new(2,j,i) = MLS_scheme(x(i-1),y(j),x(i),y(j),R,x_circ,y_circ,squeeze(U(:,j,i)),w(4),Rho(1,j,i),Ksi(:,4),c_s,f(4,j,i),Tau);
+                    else
+                        f_new(2,j,i) = f(2,j,i-1);
+                    end
+                    if Zone_ID(j+1,i) == 1 % Direction 5
+                        f_new(3,j,i) = MLS_scheme(x(i),y(j+1),x(i),y(j),R,x_circ,y_circ,squeeze(U(:,j,i)),w(5),Rho(1,j,i),Ksi(:,5),c_s,f(5,j,i),Tau);
+                    else
+                        f_new(3,j,i) = f(3,j+1,i);
+                    end
+                    if Zone_ID(j-1,i+1) == 1 % Direction 6
+                        f_new(8,j,i) = MLS_scheme(x(i+1),y(j-1),x(i),y(j),R,x_circ,y_circ,squeeze(U(:,j,i)),w(6),Rho(1,j,i),Ksi(:,6),c_s,f(6,j,i),Tau);
+                    else
+                        f_new(8,j,i) = f(8,j-1,i+1);
+                    end
+                    if Zone_ID(j-1,i-1) == 1 % Direction 7
+                        f_new(9,j,i) = MLS_scheme(x(i-1),y(j-1),x(i),y(j),R,x_circ,y_circ,squeeze(U(:,j,i)),w(7),Rho(1,j,i),Ksi(:,7),c_s,f(7,j,i),Tau);
+                    else
+                        f_new(9,j,i) = f(9,j-1,i-1);
+                    end         
+                    if Zone_ID(j+1,i-1) == 1 % Direction 8
+                        f_new(6,j,i) = MLS_scheme(x(i-1),y(j+1),x(i),y(j),R,x_circ,y_circ,squeeze(U(:,j,i)),w(8),Rho(1,j,i),Ksi(:,8),c_s,f(8,j,i),Tau);
+                    else
+                        f_new(6,j,i) = f(6,j+1,i-1);
+                    end
+                    if Zone_ID(j+1,i+1) == 1 % Direction 9
+                        f_new(7,j,i) = MLS_scheme(x(i+1),y(j+1),x(i),y(j),R,x_circ,y_circ,squeeze(U(:,j,i)),w(9),Rho(1,j,i),Ksi(:,9),c_s,f(9,j,i),Tau);
+                    else
+                        f_new(7,j,i) = f(7,j+1,i+1);
+                    end
+                case 3
+                    % GZS curved boundary scheme goes here
             end
 
-            %% Direction 3
-            if Zone_ID(j-1,i) == 1 % b-node
-                % xy coords of node inside of circle
-                x1=x(i);
-                y1=y(j-1);
-                % xy coords of node outside of circle
-                x2=x(i);
-                y2=y(j);
-                
-                c_w = find_the_wall_point(x1,y1,x2,y2, R, x_circ, y_circ);
-                delta = sqrt((c_w(1) - x2)^2 + (c_w(2) - y2)^2)/sqrt((x1-x2)^2 + (y1-y2)^2);
-                if delta >= 0.5
-                    Chi = (2*delta - 1)/Tau;
-                    U_bf = (delta - 1)*squeeze(U(:,j,i))/delta;
-                elseif delta < 0.5
-                    Chi = (2*delta - 1)/(Tau - 1);
-                    U_bf = squeeze(U(:,j,i));
-                end
-                U_f = squeeze(U(:,j,i))';
-                
-                f_star = w(3)*Rho(1,j,i)*(1 + U_bf'*Ksi(:,3)/c_s^2 + (U_f*Ksi(:,3))^2/(2*c_s^4) - dot(U_f,U_f)/(2*c_s^2));
-                
-                f_new(5,j,i) = (1 - Chi)*f(3,j,i) + Chi*f_star; % Weird "bounceback"
-            else
-                f_new(5,j,i) = f(5,j-1,i);
-            end
-            %% Direction 4
-            if Zone_ID(j,i-1) == 1 % b-node
-                % xy coords of node inside of circle
-                x1=x(i-1);
-                y1=y(j);
-                % xy coords of node outside of circle
-                x2=x(i);
-                y2=y(j);
-                
-                c_w = find_the_wall_point(x1,y1,x2,y2, R, x_circ, y_circ);
-                delta = sqrt((c_w(1) - x2)^2 + (c_w(2) - y2)^2)/sqrt((x1-x2)^2 + (y1-y2)^2);
-                if delta >= 0.5
-                    Chi = (2*delta - 1)/Tau;
-                    U_bf = (delta - 1)*squeeze(U(:,j,i))/delta;
-                elseif delta < 0.5
-                    Chi = (2*delta - 1)/(Tau - 1);
-                    U_bf = squeeze(U(:,j,i));
-                end
-                U_f = squeeze(U(:,j,i))';
-                
-                f_star = w(4)*Rho(1,j,i)*(1 + U_bf'*Ksi(:,4)/c_s^2 + (U_f*Ksi(:,4))^2/(2*c_s^4) - dot(U_f,U_f)/(2*c_s^2));
-                
-                f_new(2,j,i) = (1 - Chi)*f(4,j,i) + Chi*f_star; % Weird "bounceback"
-            else
-                f_new(2,j,i) = f(2,j,i-1);
-            end
-            %% Direction 5
-            if Zone_ID(j+1,i) == 1 % b-node
-                % xy coords of node inside of circle
-                x1=x(i);
-                y1=y(j+1);
-                % xy coords of node outside of circle
-                x2=x(i);
-                y2=y(j);
-                
-                c_w = find_the_wall_point(x1,y1,x2,y2, R, x_circ, y_circ);
-                delta = sqrt((c_w(1) - x2)^2 + (c_w(2) - y2)^2)/sqrt((x1-x2)^2 + (y1-y2)^2);
-                if delta >= 0.5
-                    Chi = (2*delta - 1)/Tau;
-                    U_bf = (delta - 1)*squeeze(U(:,j,i))/delta;
-                elseif delta < 0.5
-                    Chi = (2*delta - 1)/(Tau - 1);
-                    U_bf = squeeze(U(:,j,i));
-                end
-                U_f = squeeze(U(:,j,i))';
-                
-                f_star = w(5)*Rho(1,j,i)*(1 + U_bf'*Ksi(:,5)/c_s^2 + (U_f*Ksi(:,5))^2/(2*c_s^4) - dot(U_f,U_f)/(2*c_s^2));
-                
-                f_new(3,j,i) = (1 - Chi)*f(5,j,i) + Chi*f_star; % Weird "bounceback"
-            else
-                f_new(3,j,i) = f(3,j+1,i);
-            end
-            %% Direction 6
-            if Zone_ID(j-1,i+1) == 1 % b-node
-                % xy coords of node inside of circle
-                x1=x(i+1);
-                y1=y(j-1);
-                % xy coords of node outside of circle
-                x2=x(i);
-                y2=y(j);
-                
-                c_w = find_the_wall_point(x1,y1,x2,y2, R, x_circ, y_circ);
-                delta = sqrt((c_w(1) - x2)^2 + (c_w(2) - y2)^2)/sqrt((x1-x2)^2 + (y1-y2)^2);
-                if delta >= 0.5
-                    Chi = (2*delta - 1)/Tau;
-                    U_bf = (delta - 1)*squeeze(U(:,j,i))/delta;
-                elseif delta < 0.5
-                    Chi = (2*delta - 1)/(Tau - 1);
-                    U_bf = squeeze(U(:,j,i));
-                end
-                U_f = squeeze(U(:,j,i))';
-                
-                f_star = w(6)*Rho(1,j,i)*(1 + U_bf'*Ksi(:,6)/c_s^2 + (U_f*Ksi(:,6))^2/(2*c_s^4) - dot(U_f,U_f)/(2*c_s^2));
-                
-                f_new(8,j,i) = (1 - Chi)*f(6,j,i) + Chi*f_star; % Weird "bounceback"
-            else
-                f_new(8,j,i) = f(8,j-1,i+1);
-            end
-            %% Direction 7
-            if Zone_ID(j-1,i-1) == 1 % b-node
-                % xy coords of node inside of circle
-                x1=x(i-1);
-                y1=y(j-1);
-                % xy coords of node outside of circle
-                x2=x(i);
-                y2=y(j);
-                
-                c_w = find_the_wall_point(x1,y1,x2,y2, R, x_circ, y_circ);
-                delta = sqrt((c_w(1) - x2)^2 + (c_w(2) - y2)^2)/sqrt((x1-x2)^2 + (y1-y2)^2);
-                if delta >= 0.5
-                    Chi = (2*delta - 1)/Tau;
-                    U_bf = (delta - 1)*squeeze(U(:,j,i))/delta;
-                elseif delta < 0.5
-                    Chi = (2*delta - 1)/(Tau - 1);
-                    U_bf = squeeze(U(:,j,i));
-                end
-                U_f = squeeze(U(:,j,i))';
-                
-                f_star = w(7)*Rho(1,j,i)*(1 + U_bf'*Ksi(:,7)/c_s^2 + (U_f*Ksi(:,7))^2/(2*c_s^4) - dot(U_f,U_f)/(2*c_s^2));
-                
-                f_new(9,j,i) = (1 - Chi)*f(7,j,i) + Chi*f_star; % Weird "bounceback"
-            else
-                f_new(9,j,i) = f(9,j-1,i-1);
-            end
-            %% Direction 8
-            if Zone_ID(j+1,i-1) == 1 % b-node
-                % xy coords of node inside of circle
-                x1=x(i-1);
-                y1=y(j+1);
-                % xy coords of node outside of circle
-                x2=x(i);
-                y2=y(j);
-                
-                c_w = find_the_wall_point(x1,y1,x2,y2, R, x_circ, y_circ);
-                delta = sqrt((c_w(1) - x2)^2 + (c_w(2) - y2)^2)/sqrt((x1-x2)^2 + (y1-y2)^2);
-                if delta >= 0.5
-                    Chi = (2*delta - 1)/Tau;
-                    U_bf = (delta - 1)*squeeze(U(:,j,i))/delta;
-                elseif delta < 0.5
-                    Chi = (2*delta - 1)/(Tau - 1);
-                    U_bf = squeeze(U(:,j,i));
-                end
-                U_f = squeeze(U(:,j,i))';
-                
-                f_star = w(8)*Rho(1,j,i)*(1 + U_bf'*Ksi(:,8)/c_s^2 + (U_f*Ksi(:,8))^2/(2*c_s^4) - dot(U_f,U_f)/(2*c_s^2));
-                
-                f_new(6,j,i) = (1 - Chi)*f(8,j,i) + Chi*f_star; % Weird "bounceback"
-            else
-                f_new(6,j,i) = f(6,j+1,i-1);
-            end
-            %% Direction 9
-            if Zone_ID(j+1,i+1) == 1 % b-node
-                % xy coords of node inside of circle
-                x1=x(i+1);
-                y1=y(j+1);
-                % xy coords of node outside of circle
-                x2=x(i);
-                y2=y(j);
-                
-                c_w = find_the_wall_point(x1,y1,x2,y2, R, x_circ, y_circ);
-                delta = sqrt((c_w(1) - x2)^2 + (c_w(2) - y2)^2)/sqrt((x1-x2)^2 + (y1-y2)^2);
-                if delta >= 0.5
-                    Chi = (2*delta - 1)/Tau;
-                    U_bf = (delta - 1)*squeeze(U(:,j,i))/delta;
-                elseif delta < 0.5
-                    Chi = (2*delta - 1)/(Tau - 1);
-                    U_bf = squeeze(U(:,j,i));
-                end
-                U_f = squeeze(U(:,j,i))';
-                
-                f_star = w(9)*Rho(1,j,i)*(1 + U_bf'*Ksi(:,9)/c_s^2 + (U_f*Ksi(:,9))^2/(2*c_s^4) - dot(U_f,U_f)/(2*c_s^2));
-                
-                f_new(7,j,i) = (1 - Chi)*f(9,j,i) + Chi*f_star; % Weird "bounceback"
-            else
-                f_new(7,j,i) = f(7,j+1,i+1);
-            end
+            
         else
             % All other nodes in fluid domain
             if j == 1 % This is the top boundary nodes
@@ -472,6 +358,7 @@ err = abs(sum(Rho,"all")-old_rho);
 
 fprintf("Itt: %i   |   Err: %e\n", t, err)
 end
+toc
 %% Post-Processing/Visualizaation
 y_benchmark=0:0.01:1;
 for i=1:length(y_benchmark)

@@ -1,4 +1,4 @@
-function f_new = FH_scheme(x1,y1,x2,y2,R,x_circ,y_circ,U,w,Rho,Ksi,c_s,f,Tau)
+function f_new = MLS_scheme(x1,y1,x2,y2,R,x_circ,y_circ,U,w,Rho,Ksi,c_s,f,Tau,U_ff)
 
     c_w = find_the_wall_point(x1,y1,x2,y2, R, x_circ, y_circ);
     delta = sqrt((c_w(1) - x2)^2 + (c_w(2) - y2)^2)/sqrt((x1-x2)^2 + (y1-y2)^2);
@@ -6,8 +6,8 @@ function f_new = FH_scheme(x1,y1,x2,y2,R,x_circ,y_circ,U,w,Rho,Ksi,c_s,f,Tau)
         Chi = (2*delta - 1)/Tau;
         U_bf = (delta - 1)*U/delta;
     elseif delta < 0.5
-        Chi = (2*delta - 1)/(Tau - 1);
-        U_bf = U;
+        Chi = (2*delta - 1)/(Tau - 2);
+        U_bf = U_ff;
     end
     U_f = U';
     
