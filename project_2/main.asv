@@ -77,7 +77,7 @@ c_s=1/sqrt(3); % Speed of Sound for D2Q9
 Tau=0.8; % Relaxation Time
 %Rho_in=2;
 
-Re = 40;
+Re = 20;
 viscos = (Tau-0.5)*c_s^2;
 U_in = Re*viscos/(D);
 M = U_in*c_s;
@@ -95,7 +95,7 @@ end
 f_new=f;
 f_eq=f;
 %%
-Timer=5000;
+Timer=10000;
 %% Solving
 x_circ = center_x;
 y_circ = center_y;
