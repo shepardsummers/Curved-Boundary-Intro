@@ -4,7 +4,7 @@ clear, clc;
 D = 21; 
 
 % FH:1, MLS:2, GZS:3
-scheme = 2;
+scheme = 3;
 
 N_x = 35*D;
 N_y = 9*D;
@@ -98,7 +98,7 @@ end
 f_new=f;
 f_eq=f;
 %%
-Timer=7000;
+Timer=5000;
 %% Solving
 x_circ = center_x;
 y_circ = center_y;
@@ -121,89 +121,129 @@ for j=1:N_y
                 case 1
                     % FH curved boundary scheme goes here
                     if Zone_ID(j,i+1) == 1 % Direction 2
-                        f_new(4,j,i) = FH_scheme(x(i+1),y(j),x(i),y(j),R,x_circ,y_circ,squeeze(U(:,j,i)),w(2),Rho(1,j,i),Ksi(:,2),c_s,f(2,j,i),Tau);
+                        f_new(4,j,i) = FH_scheme(x(i+1),y(j),x(i),y(j),R,x_circ,y_circ,U(:,j,i),w(2),Rho(1,j,i),Ksi(:,2),c_s,f(2,j,i),Tau);
                     else
                         f_new(4,j,i) = f(4,j,i+1);
                     end
                     if Zone_ID(j-1,i) == 1 % Direction 3
-                        f_new(5,j,i) = FH_scheme(x(i),y(j-1),x(i),y(j),R,x_circ,y_circ,squeeze(U(:,j,i)),w(3),Rho(1,j,i),Ksi(:,3),c_s,f(3,j,i),Tau);
+                        f_new(5,j,i) = FH_scheme(x(i),y(j-1),x(i),y(j),R,x_circ,y_circ,U(:,j,i),w(3),Rho(1,j,i),Ksi(:,3),c_s,f(3,j,i),Tau);
                     else
                         f_new(5,j,i) = f(5,j-1,i);
                     end
                     if Zone_ID(j,i-1) == 1 % Direction 4
-                        f_new(2,j,i) = FH_scheme(x(i-1),y(j),x(i),y(j),R,x_circ,y_circ,squeeze(U(:,j,i)),w(4),Rho(1,j,i),Ksi(:,4),c_s,f(4,j,i),Tau);
+                        f_new(2,j,i) = FH_scheme(x(i-1),y(j),x(i),y(j),R,x_circ,y_circ,U(:,j,i),w(4),Rho(1,j,i),Ksi(:,4),c_s,f(4,j,i),Tau);
                     else
                         f_new(2,j,i) = f(2,j,i-1);
                     end
                     if Zone_ID(j+1,i) == 1 % Direction 5
-                        f_new(3,j,i) = FH_scheme(x(i),y(j+1),x(i),y(j),R,x_circ,y_circ,squeeze(U(:,j,i)),w(5),Rho(1,j,i),Ksi(:,5),c_s,f(5,j,i),Tau);
+                        f_new(3,j,i) = FH_scheme(x(i),y(j+1),x(i),y(j),R,x_circ,y_circ,U(:,j,i),w(5),Rho(1,j,i),Ksi(:,5),c_s,f(5,j,i),Tau);
                     else
                         f_new(3,j,i) = f(3,j+1,i);
                     end
                     if Zone_ID(j-1,i+1) == 1 % Direction 6
-                        f_new(8,j,i) = FH_scheme(x(i+1),y(j-1),x(i),y(j),R,x_circ,y_circ,squeeze(U(:,j,i)),w(6),Rho(1,j,i),Ksi(:,6),c_s,f(6,j,i),Tau);
+                        f_new(8,j,i) = FH_scheme(x(i+1),y(j-1),x(i),y(j),R,x_circ,y_circ,U(:,j,i),w(6),Rho(1,j,i),Ksi(:,6),c_s,f(6,j,i),Tau);
                     else
                         f_new(8,j,i) = f(8,j-1,i+1);
                     end
                     if Zone_ID(j-1,i-1) == 1 % Direction 7
-                        f_new(9,j,i) = FH_scheme(x(i-1),y(j-1),x(i),y(j),R,x_circ,y_circ,squeeze(U(:,j,i)),w(7),Rho(1,j,i),Ksi(:,7),c_s,f(7,j,i),Tau);
+                        f_new(9,j,i) = FH_scheme(x(i-1),y(j-1),x(i),y(j),R,x_circ,y_circ,U(:,j,i),w(7),Rho(1,j,i),Ksi(:,7),c_s,f(7,j,i),Tau);
                     else
                         f_new(9,j,i) = f(9,j-1,i-1);
                     end         
                     if Zone_ID(j+1,i-1) == 1 % Direction 8
-                        f_new(6,j,i) = FH_scheme(x(i-1),y(j+1),x(i),y(j),R,x_circ,y_circ,squeeze(U(:,j,i)),w(8),Rho(1,j,i),Ksi(:,8),c_s,f(8,j,i),Tau);
+                        f_new(6,j,i) = FH_scheme(x(i-1),y(j+1),x(i),y(j),R,x_circ,y_circ,U(:,j,i),w(8),Rho(1,j,i),Ksi(:,8),c_s,f(8,j,i),Tau);
                     else
                         f_new(6,j,i) = f(6,j+1,i-1);
                     end
                     if Zone_ID(j+1,i+1) == 1 % Direction 9
-                        f_new(7,j,i) = FH_scheme(x(i+1),y(j+1),x(i),y(j),R,x_circ,y_circ,squeeze(U(:,j,i)),w(9),Rho(1,j,i),Ksi(:,9),c_s,f(9,j,i),Tau);
+                        f_new(7,j,i) = FH_scheme(x(i+1),y(j+1),x(i),y(j),R,x_circ,y_circ,U(:,j,i),w(9),Rho(1,j,i),Ksi(:,9),c_s,f(9,j,i),Tau);
                     else
                         f_new(7,j,i) = f(7,j+1,i+1);
                     end
                 case 2
                     % MLS curved boundary scheme goes here
                     if Zone_ID(j,i+1) == 1 % Direction 2
-                        f_new(4,j,i) = MLS_scheme(x(i+1),y(j),x(i),y(j),R,x_circ,y_circ,squeeze(U(:,j,i)),w(2),Rho(1,j,i),Ksi(:,2),c_s,f(2,j,i),Tau,squeeze(U(:,j,i-1)));
+                        f_new(4,j,i) = MLS_scheme(x(i+1),y(j),x(i),y(j),R,x_circ,y_circ,U(:,j,i),w(2),Rho(1,j,i),Ksi(:,2),c_s,f(2,j,i),Tau,squeeze(U(:,j,i-1)));
                     else
                         f_new(4,j,i) = f(4,j,i+1);
                     end
                     if Zone_ID(j-1,i) == 1 % Direction 3
-                        f_new(5,j,i) = MLS_scheme(x(i),y(j-1),x(i),y(j),R,x_circ,y_circ,squeeze(U(:,j,i)),w(3),Rho(1,j,i),Ksi(:,3),c_s,f(3,j,i),Tau,squeeze(U(:,j+1,i)));
+                        f_new(5,j,i) = MLS_scheme(x(i),y(j-1),x(i),y(j),R,x_circ,y_circ,U(:,j,i),w(3),Rho(1,j,i),Ksi(:,3),c_s,f(3,j,i),Tau,squeeze(U(:,j+1,i)));
                     else
                         f_new(5,j,i) = f(5,j-1,i);
                     end
                     if Zone_ID(j,i-1) == 1 % Direction 4
-                        f_new(2,j,i) = MLS_scheme(x(i-1),y(j),x(i),y(j),R,x_circ,y_circ,squeeze(U(:,j,i)),w(4),Rho(1,j,i),Ksi(:,4),c_s,f(4,j,i),Tau,squeeze(U(:,j,i+1)));
+                        f_new(2,j,i) = MLS_scheme(x(i-1),y(j),x(i),y(j),R,x_circ,y_circ,U(:,j,i),w(4),Rho(1,j,i),Ksi(:,4),c_s,f(4,j,i),Tau,squeeze(U(:,j,i+1)));
                     else
                         f_new(2,j,i) = f(2,j,i-1);
                     end
                     if Zone_ID(j+1,i) == 1 % Direction 5
-                        f_new(3,j,i) = MLS_scheme(x(i),y(j+1),x(i),y(j),R,x_circ,y_circ,squeeze(U(:,j,i)),w(5),Rho(1,j,i),Ksi(:,5),c_s,f(5,j,i),Tau,squeeze(U(:,j-1,i)));
+                        f_new(3,j,i) = MLS_scheme(x(i),y(j+1),x(i),y(j),R,x_circ,y_circ,U(:,j,i),w(5),Rho(1,j,i),Ksi(:,5),c_s,f(5,j,i),Tau,squeeze(U(:,j-1,i)));
                     else
                         f_new(3,j,i) = f(3,j+1,i);
                     end
                     if Zone_ID(j-1,i+1) == 1 % Direction 6
-                        f_new(8,j,i) = MLS_scheme(x(i+1),y(j-1),x(i),y(j),R,x_circ,y_circ,squeeze(U(:,j,i)),w(6),Rho(1,j,i),Ksi(:,6),c_s,f(6,j,i),Tau,squeeze(U(:,j+1,i-1)));
+                        f_new(8,j,i) = MLS_scheme(x(i+1),y(j-1),x(i),y(j),R,x_circ,y_circ,U(:,j,i),w(6),Rho(1,j,i),Ksi(:,6),c_s,f(6,j,i),Tau,squeeze(U(:,j+1,i-1)));
                     else
                         f_new(8,j,i) = f(8,j-1,i+1);
                     end
                     if Zone_ID(j-1,i-1) == 1 % Direction 7
-                        f_new(9,j,i) = MLS_scheme(x(i-1),y(j-1),x(i),y(j),R,x_circ,y_circ,squeeze(U(:,j,i)),w(7),Rho(1,j,i),Ksi(:,7),c_s,f(7,j,i),Tau,squeeze(U(:,j+1,i+1)));
+                        f_new(9,j,i) = MLS_scheme(x(i-1),y(j-1),x(i),y(j),R,x_circ,y_circ,U(:,j,i),w(7),Rho(1,j,i),Ksi(:,7),c_s,f(7,j,i),Tau,squeeze(U(:,j+1,i+1)));
                     else
                         f_new(9,j,i) = f(9,j-1,i-1);
                     end         
                     if Zone_ID(j+1,i-1) == 1 % Direction 8
-                        f_new(6,j,i) = MLS_scheme(x(i-1),y(j+1),x(i),y(j),R,x_circ,y_circ,squeeze(U(:,j,i)),w(8),Rho(1,j,i),Ksi(:,8),c_s,f(8,j,i),Tau,squeeze(U(:,j-1,i+1)));
+                        f_new(6,j,i) = MLS_scheme(x(i-1),y(j+1),x(i),y(j),R,x_circ,y_circ,U(:,j,i),w(8),Rho(1,j,i),Ksi(:,8),c_s,f(8,j,i),Tau,squeeze(U(:,j-1,i+1)));
                     else
                         f_new(6,j,i) = f(6,j+1,i-1);
                     end
                     if Zone_ID(j+1,i+1) == 1 % Direction 9
-                        f_new(7,j,i) = MLS_scheme(x(i+1),y(j+1),x(i),y(j),R,x_circ,y_circ,squeeze(U(:,j,i)),w(9),Rho(1,j,i),Ksi(:,9),c_s,f(9,j,i),Tau,squeeze(U(:,j-1,i-1)));
+                        f_new(7,j,i) = MLS_scheme(x(i+1),y(j+1),x(i),y(j),R,x_circ,y_circ,U(:,j,i),w(9),Rho(1,j,i),Ksi(:,9),c_s,f(9,j,i),Tau,squeeze(U(:,j-1,i-1)));
                     else
                         f_new(7,j,i) = f(7,j+1,i+1);
                     end
                 case 3
                     % GZS curved boundary scheme goes here
+                    if Zone_ID(j,i+1) == 1 % Direction 2
+                        f_new(4,j,i) = GZS_scheme(x(i+1),y(j),x(i),y(j),R,x_circ,y_circ,U(:,j,i),U(:,j,i-1),w(2),Rho(1,j,i),Ksi(:,2),c_s,f(2,j,i),f_eq(2,j,i),f(2,j,i-1),f_eq(2,j,i-1),Tau);
+                    else
+                        f_new(4,j,i) = f(4,j,i+1);
+                    end
+                    if Zone_ID(j-1,i) == 1 % Direction 3
+                        f_new(5,j,i) = GZS_scheme(x(i),y(j-1),x(i),y(j),R,x_circ,y_circ,U(:,j,i),U(:,j+1,i),w(3),Rho(1,j,i),Ksi(:,3),c_s,f(3,j,i),f_eq(3,j,i),f(3,j+1,i),f_eq(3,j+1,i),Tau);
+                    else
+                        f_new(5,j,i) = f(5,j-1,i);
+                    end
+                    if Zone_ID(j,i-1) == 1 % Direction 4
+                        f_new(2,j,i) = GZS_scheme(x(i-1),y(j),x(i),y(j),R,x_circ,y_circ,U(:,j,i),U(:,j,i+1),w(4),Rho(1,j,i),Ksi(:,4),c_s,f(4,j,i),f_eq(4,j,i),f(4,j,i+1),f_eq(4,j,i+1),Tau);
+                    else
+                        f_new(2,j,i) = f(2,j,i-1);
+                    end
+                    if Zone_ID(j+1,i) == 1 % Direction 5
+                        f_new(3,j,i) = GZS_scheme(x(i),y(j+1),x(i),y(j),R,x_circ,y_circ,U(:,j,i),U(:,j-1,i),w(5),Rho(1,j,i),Ksi(:,5),c_s,f(5,j,i),f_eq(5,j,i),f(5,j-1,i),f_eq(5,j-1,i),Tau);
+                    else
+                        f_new(3,j,i) = f(3,j+1,i);
+                    end
+                    if Zone_ID(j-1,i+1) == 1 % Direction 6
+                        f_new(8,j,i) = GZS_scheme(x(i+1),y(j-1),x(i),y(j),R,x_circ,y_circ,U(:,j,i),U(:,j+1,i-1),w(6),Rho(1,j,i),Ksi(:,6),c_s,f(6,j,i),f_eq(6,j,i),f(6,j+1,i-1),f_eq(6,j+1,i-1),Tau);
+                    else
+                        f_new(8,j,i) = f(8,j-1,i+1);
+                    end
+                    if Zone_ID(j-1,i-1) == 1 % Direction 7
+                        f_new(9,j,i) = GZS_scheme(x(i-1),y(j-1),x(i),y(j),R,x_circ,y_circ,U(:,j,i),U(:,j+1,i+1),w(7),Rho(1,j,i),Ksi(:,7),c_s,f(7,j,i),f_eq(7,j,i),f(7,j+1,i+1),f_eq(7,j+1,i+1),Tau);
+                    else
+                        f_new(9,j,i) = f(9,j-1,i-1);
+                    end         
+                    if Zone_ID(j+1,i-1) == 1 % Direction 8
+                        f_new(6,j,i) = GZS_scheme(x(i-1),y(j+1),x(i),y(j),R,x_circ,y_circ,U(:,j,i),U(:,j-1,i+1),w(8),Rho(1,j,i),Ksi(:,8),c_s,f(8,j,i),f_eq(8,j,i),f(8,j-1,i+1),f_eq(8,j-1,i+1),Tau);
+                    else
+                        f_new(6,j,i) = f(6,j+1,i-1);
+                    end
+                    if Zone_ID(j+1,i+1) == 1 % Direction 9
+                        f_new(7,j,i) = GZS_scheme(x(i+1),y(j+1),x(i),y(j),R,x_circ,y_circ,U(:,j,i),U(:,j-1,i-1),w(9),Rho(1,j,i),Ksi(:,9),c_s,f(9,j,i),f_eq(9,j,i),f(9,j-1,i-1),f_eq(9,j-1,i-1),Tau);
+                    else
+                        f_new(7,j,i) = f(7,j+1,i+1);
+                    end
             end
 
             
